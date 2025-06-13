@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production node index.js",
+     "start": "cross-env NODE_ENV=production node index.js",
+    "start:prod": "cross-env NODE_ENV=production pm2 start index.js --name jobhunter-server",
     "dev": "cross-env NODE_ENV=development nodemon index.js",
     "test": "cross-env NODE_ENV=testing jest --detectOpenHandles --forceExit",
     "lint": "eslint . --ext .js",
@@ -48,7 +49,7 @@
     "@utils": "utils",
     "@models": "api/v1/models",
   "@controllers": "api/v1/controllers",
-  "@middleware": "api/v1/middleware",
+  "@middleware": "api/v1/middlewares",
   "@services": "api/v1/services",
   "@validations": "api/v1/validations",
   "@config": "config",
