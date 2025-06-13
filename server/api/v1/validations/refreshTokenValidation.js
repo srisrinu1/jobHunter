@@ -25,9 +25,9 @@ const refreshTokenValidationSchema = joi.object({
         .allow('')
         .optional(),
     ip:joi.string()
-       .ip({versions: ['ipv4', 'ipv6']},cidr:'forbidden')
+       .ip({ versions: ['ipv4', 'ipv6'], cidr: 'forbidden' })
        .allow('')
        .optional(),   
 });
 
-module.exports = { refreshTokenValidationSchema};
+module.exports = { refreshTokenValidationSchema };
