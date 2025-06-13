@@ -68,4 +68,12 @@ const refreshTokens=async(refreshToken,reqMeta={})=>{
 
 
 
+module.exports = {
+  registerUser,
+  loginUser,
+  refreshTokens,
+};
+
+
+
 
