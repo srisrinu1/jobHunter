@@ -120,7 +120,7 @@ const logOut=async (req, res,next) => {
                 status: 'Refresh token is required'
             });
         }
-        await authService.logoutUser(refreshToken);
+        await authService.logOutUser(refreshToken);
         res.clearCookie('accessToken')
         .clearCookie('refreshToken')
         .status(STATUS.OK)
