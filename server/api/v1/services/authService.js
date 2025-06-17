@@ -27,7 +27,11 @@ const issueTokens=async(user,reqMeta={})=>{
 const registerUser=async(userData)=>{
     const user=new User(userData);
     await user.save();
-    return user;
+    const tokens=await issueTokens(user,reqMeta);
+    return {
+        user,
+        ...tokens
+    };
 }
 
 const loginUser=async(email, password,reqMeta={})=>{
