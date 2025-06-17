@@ -142,9 +142,6 @@ const requestPasswordReset = async (req, res,next) => {
         res.status(STATUS.OK).json({
             success: true,
             message: 'If that email is in our system, you will receive a password reset link shortly',
-            data: {
-                token
-            }
         });
 
     }catch(error){
