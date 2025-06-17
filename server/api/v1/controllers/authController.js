@@ -1,36 +1,34 @@
-const authService = require('@services/authService');
+const {authService}=require('@services');
+const {formatUserResponse}=require('@utils/formatResponse');
 const STATUS = require('@utils/statusCodes');
+
+const isProduction = process.env.NODE_ENV === 'production';
+const cookieOptions_accessToken = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'Strict' : 'Lax',
+    maxAge: 15 * 60 * 1000
+};
+const cookieOptions_refreshToken = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'Strict' : 'Lax',
+    maxAge: parseInt(process.env.JWT_REFRESH_EXPIRES_MS, 10) || 7 * 24 * 60 * 60 * 1000,
+};
 
 const register = async (req, res,next) => {
      try{
         const reqMeta= {userAgent: req.get('User-Agent'), ip: req.ip };
         const { user,accessToken,refreshToken}=await authService.registerUser(req.body,reqMeta);
-        const isProduction = process.env.NODE_ENV === 'production';
-        res.cookie('accessToken',accessToken,{
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction?'Strict':'Lax',
-            maxAge: 15 * 60 * 1000
-        })
-        .cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction?'Strict':'Lax',
-            maxAge: parseInt(process.env.JWT_REFRESH_EXPIRES_MS, 10) || 7 * 24 * 60 * 60 * 1000,
-        })
+        res.cookie('accessToken',accessToken,cookieOptions_accessToken)
+        .cookie('refreshToken', refreshToken, cookieOptions_refreshToken)
         .status(STATUS.CREATED)
         .json(
             {  
                 success: true,
                 status: 'Registration successful',
                 data: {
-                    user: {
-                        id: user._id,
-                        email: user.email,
-                        name: user.name,
-                        avatar:user.avatar,
-                        role: user.role
-                    }
+                    user:formatUserResponse(user)
                 }
             }
         )
@@ -44,31 +42,14 @@ const login = async (req, res,next) => {
     try{
         const reqMeta= {userAgent: req.get('User-Agent'), ip: req.ip };
         const { user, accessToken, refreshToken } = await authService.loginUser(req.body.email, req.body.password,reqMeta);
-        const isProduction = process.env.NODE_ENV === 'production';
-        res.cookie('accessToken', accessToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'Strict' : 'Lax',
-            maxAge: 15 * 60 * 1000
-        })
-        .cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'Strict' : 'Lax',
-            maxAge: parseInt(process.env.JWT_REFRESH_EXPIRES_MS, 10) || 7 * 24 * 60 * 60 * 1000,
-        })
+        res.cookie('accessToken', accessToken, cookieOptions_accessToken)
+        .cookie('refreshToken', refreshToken, cookieOptions_refreshToken)
         .status(STATUS.OK)
         .json({
             success: true,
             status: 'Login successful',
             data: {
-                user: {
-                    id: user._id,
-                    email: user.email,
-                    name: user.name,
-                    avatar:user.avatar,
-                    role: user.role
-                }
+                user: formatUserResponse(user)
             }
         });
     }catch(error) {
@@ -86,20 +67,9 @@ const refresh = async (req, res,next) => {
             });
         }
         const reqMeta= {userAgent: req.get('User-Agent'), ip: req.ip };
-        const {accessToken,refreshToken:newrefreshToken}=await authService.refreshToken(refreshToken,reqMeta);
-        const isProduction = process.env.NODE_ENV === 'production';
-        res.cookie('accessToken', accessToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'Strict' : 'Lax',
-            maxAge: 15 * 60 * 1000
-        })
-        .cookie('refreshToken', newrefreshToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: isProduction ? 'Strict' : 'Lax',
-            maxAge: parseInt(process.env.JWT_REFRESH_EXPIRES_MS, 10) || 7 * 24 * 60 * 60 * 1000,
-        })
+        const {accessToken,refreshToken:newrefreshToken}=await authService.refreshTokens(refreshToken,reqMeta);
+        res.cookie('accessToken', accessToken, cookieOptions_accessToken)
+        .cookie('refreshToken', newrefreshToken, cookieOptions_refreshToken)
         .status(STATUS.OK)
         .json({
             success: true,
@@ -179,13 +149,7 @@ const getUserProfile=async(req,res,next)=>{
         res.status(STATUS.OK).json({
             success: true,
             data: {
-                user: {
-                    id: user._id,
-                    email: user.email,
-                    name: user.name,
-                    avatar:user.avatar,
-                    role: user.role
-                }
+                user: formatUserResponse(user)
             }
         });
     }catch(error){
