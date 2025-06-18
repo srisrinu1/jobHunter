@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-     "start": "cross-env NODE_ENV=production node index.js",
+    "start": "cross-env NODE_ENV=production node index.js",
     "start:prod": "cross-env NODE_ENV=production pm2 start index.js --name jobhunter-server",
     "dev": "cross-env NODE_ENV=development nodemon index.js",
     "test": "cross-env NODE_ENV=testing jest --detectOpenHandles --forceExit",
@@ -29,6 +29,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "module-alias": "^2.2.3",
+    "mongo": "^0.1.0",
     "mongoose": "^8.15.1",
     "morgan": "^1.10.0",
     "passport": "^0.7.0",
@@ -48,11 +49,11 @@
   "_moduleAliases": {
     "@utils": "utils",
     "@models": "api/v1/models",
-  "@controllers": "api/v1/controllers",
-  "@middleware": "api/v1/middlewares",
-  "@services": "api/v1/services",
-  "@validations": "api/v1/validations",
-  "@config": "config",
-  "@routes": "api/v1/routes"
+    "@controllers": "api/v1/controllers",
+    "@middleware": "api/v1/middlewares",
+    "@services": "api/v1/services",
+    "@validations": "api/v1/validations",
+    "@config": "config",
+    "@routes": "api/v1/routes"
   }
 }
