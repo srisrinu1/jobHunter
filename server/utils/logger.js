@@ -1,6 +1,7 @@
 const {createLogger,format,transports}=require('winston');
 const DailyRotateFile=require('winston-daily-rotate-file');
 const os=require('os');
+const { getRequestId } = require('./requestContext');
 
 const env = process.env.NODE_ENV || 'development';
 
@@ -20,6 +21,11 @@ else if(isTesting){
 }
 
 // const logToFile = isProduction ? true : false;
+
+const injectAlsContext=format((info)=>{
+    info.requestId = getRequestId() || 'unknown';
+    return info;
+})
 
 const devFormat=format.combine(
     format.colorize(),  
@@ -80,7 +86,10 @@ else{
 
 const logger=createLogger({
     level:logLevel,
-    format: isDevelopment? devFormat : isProduction ? prodFormat : testFormat,
+    format: format.combine(
+        injectAlsContext,
+        isDevelopment? devFormat : isProduction ? prodFormat : testFormat
+    ),
     transports:loggerTransports,
     defaultMeta:{service:'jobHunter-backend'},
 
