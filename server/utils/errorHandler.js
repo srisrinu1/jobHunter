@@ -1,7 +1,8 @@
 const CustomError=require('./CustomError');
 const logger = require('./logger');
 const STATUS = require('@config/statusCodes');
-const {getRequestId} = require('@utils/requestContext');
+const {getRequestId}=require('./requestContext');
+
 
 const errorHandler=(err,req,res,next)=>{
     const statusCode= err.statusCode ||err.status|| STATUS.INTERNAL_SERVER_ERROR;
@@ -17,6 +18,7 @@ const errorHandler=(err,req,res,next)=>{
     const response={
         success: false,
         message: err.message || 'Internal Server Error',
+        requestId: getRequestId() || 'unknown',
     }
     if (environment === 'development' || environment === 'testing') {
     response.stack = err.stack;
