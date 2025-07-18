@@ -1,7 +1,7 @@
 const {createLogger,format,transports}=require('winston');
 const DailyRotateFile=require('winston-daily-rotate-file');
 const os=require('os');
-const { getRequestId } = require('./requestContext');
+const { getRequestId,getUserId } = require('./requestContext');
 
 const env = process.env.NODE_ENV || 'development';
 
@@ -24,8 +24,10 @@ else if(isTesting){
 
 const injectAlsContext=format((info)=>{
     info.requestId = getRequestId() || 'unknown';
+    const userId = getUserId();
+    if (userId) info.userId = userId;
     return info;
-})
+});
 
 const devFormat=format.combine(
     format.colorize(),  
