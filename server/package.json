@@ -6,6 +6,7 @@
     "start": "cross-env NODE_ENV=production node index.js",
     "start:prod": "cross-env NODE_ENV=production pm2 start index.js --name jobhunter-server",
     "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "dev:start": "cross-env NODE_ENV=development node index.js",
     "test": "cross-env NODE_ENV=testing jest --detectOpenHandles --forceExit",
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix"
