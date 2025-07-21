@@ -27,7 +27,7 @@ const injectAlsContext=format((info)=>{
     const userId = getUserId();
     if (userId) info.userId = userId;
     return info;
-});
+})();
 
 const devFormat=format.combine(
     format.colorize(),  
