@@ -1,5 +1,5 @@
 const passport=require('@config/passport');
-const STATUS=require('@config/statusCodes');
+const STATUS=require('@utils/statusCodes');
 
 const authenticateJWT = (req, res, next) => {
     passport.authenticate('jwt', { session: false }, (err, user, info) => {
