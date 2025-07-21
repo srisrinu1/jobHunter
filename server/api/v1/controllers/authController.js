@@ -1,5 +1,5 @@
 const {authService}=require('@services');
-const {formatUserResponse}=require('@utils/formatResponse');
+const {formatUserResponse}=require('@utils/responseHelper');
 const STATUS = require('@utils/statusCodes');
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -116,7 +116,7 @@ const requestPasswordReset = async (req, res,next) => {
 
     }catch(error){
         res.status(STATUS.INTERNAL_SERVER_ERROR).json({
-            success: true,
+            success: false,
             message: 'If that email is in our system, you will receive a password reset link shortly',
         })
     }
