@@ -1,15 +1,30 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const {Strategy: JwtStrategy, ExtractJwt} = require('passport-jwt');
-const User=require('@models/userModel');
+const { User } = require('@models');
 const cookieExtractor = req => req?.cookies?.accessToken || null;
 
 const jwtFromRequest=req=>cookieExtractor(req)||ExtractJwt.fromAuthHeaderAsBearerToken()(req);
 
-const isProd=process.env.NODE_ENV==='production';
+const environment = process.env.NODE_ENV || 'development';
+const isProd = environment === 'production';
+
+// Get environment-specific JWT secret
+const getJwtSecret = () => {
+    switch(environment) {
+        case 'production':
+            return process.env.JWT_SECRET_PRODUCTION;
+        case 'testing':
+            return process.env.JWT_SECRET_TESTING;
+        case 'development':
+        default:
+            return process.env.JWT_SECRET_DEVELOPMENT;
+    }
+};
+
 const jwtOptions={
   jwtFromRequest,
-  secretOrKey: process.env.JWT_SECRET,
+  secretOrKey: getJwtSecret(),
   algorithms: ['HS256'],
 }
 
