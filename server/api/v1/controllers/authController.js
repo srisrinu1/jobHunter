@@ -1,6 +1,7 @@
 const {authService}=require('@services');
 const {formatUserResponse}=require('@utils/responseHelper');
 const STATUS = require('@utils/statusCodes');
+const logger = require('@utils/logger');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const cookieOptions_accessToken = {
@@ -59,11 +60,38 @@ const login = async (req, res,next) => {
 
 const refresh = async (req, res,next) => {
     try{
-        const refreshToken=req.cookies.refreshToken;
+        // Debug logging
+        logger.info(`Request method: ${req.method}`);
+        logger.info(`Request headers: ${JSON.stringify(req.headers)}`);
+        logger.info(`Request body type: ${typeof req.body}`);
+        logger.info(`Request body: ${JSON.stringify(req.body)}`);
+        logger.info(`Request cookies type: ${typeof req.cookies}`);
+        logger.info(`Request cookies: ${JSON.stringify(req.cookies)}`);
+        
+        // Check if req.body exists
+        if (!req.body) {
+            logger.error('req.body is undefined - express.json() middleware not working');
+            return res.status(STATUS.BAD_REQUEST).json({
+                success: false,
+                status: 'Request body is missing',
+                requestId: req.requestId
+            });
+        }
+        
+        // Check if req.cookies exists
+        if (!req.cookies) {
+            logger.error('req.cookies is undefined - cookie-parser middleware not working');
+        }
+        
+        const refreshToken = (req.cookies && req.cookies.refreshToken) || 
+                           (req.body && req.body.refreshToken);
+        logger.info(`Refresh token: ${refreshToken}`);
+        
         if(!refreshToken){
             return res.status(STATUS.UNAUTHORIZED).json({
                 success: false,
-                status: 'Refresh token is required'
+                status: 'Refresh token is required',
+                requestId: req.requestId
             });
         }
         const reqMeta= {userAgent: req.get('User-Agent'), ip: req.ip };
