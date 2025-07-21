@@ -2,6 +2,7 @@ const {authService}=require('@services');
 const {formatUserResponse}=require('@utils/responseHelper');
 const STATUS = require('@utils/statusCodes');
 const logger = require('@utils/logger');
+const { getRequestId } = require('@utils/requestContext');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const cookieOptions_accessToken = {
@@ -74,7 +75,7 @@ const refresh = async (req, res,next) => {
             return res.status(STATUS.BAD_REQUEST).json({
                 success: false,
                 status: 'Request body is missing',
-                requestId: req.requestId
+                requestId: getRequestId()
             });
         }
         
@@ -91,7 +92,7 @@ const refresh = async (req, res,next) => {
             return res.status(STATUS.UNAUTHORIZED).json({
                 success: false,
                 status: 'Refresh token is required',
-                requestId: req.requestId
+                requestId: getRequestId()
             });
         }
         const reqMeta= {userAgent: req.get('User-Agent'), ip: req.ip };
