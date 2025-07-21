@@ -134,14 +134,13 @@ const logOut=async (req, res,next) => {
 
 const requestPasswordReset = async (req, res,next) => {
     try{
-        const token= await authService.requestPasswordReset(req.body.email);
-        //Send the token via mail 
-        //For now,we will keep it idle.We will implement the email service later
+        const token = await authService.requestPasswordReset(req.body.email);
+        // For manual testing, include the token in the response
         res.status(STATUS.OK).json({
             success: true,
             message: 'If that email is in our system, you will receive a password reset link shortly',
+            resetToken: token
         });
-
     }catch(error){
         res.status(STATUS.INTERNAL_SERVER_ERROR).json({
             success: false,
