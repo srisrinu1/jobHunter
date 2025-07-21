@@ -1,5 +1,4 @@
-const User= require('@models/userModel');
-const RefreshToken= require('@models/refreshTokenModel');
+const { User, RefreshToken } = require('@models');
 const jwtUtil= require('@utils/jwt');
 const crypto= require('crypto');
 
@@ -24,7 +23,7 @@ const issueTokens=async(user,reqMeta={})=>{
     return { accessToken, refreshToken };
 }
 
-const registerUser=async(userData)=>{
+const registerUser=async(userData, reqMeta={})=>{
     const user=new User(userData);
     await user.save();
     const tokens=await issueTokens(user,reqMeta);
