@@ -7,6 +7,8 @@ const {connectDB} = require('./db');
 const generatedRequestId=require('@middleware/requestId');
 const passport = require('passport');
 const attachUserId = require('@middleware/attachUserId');
+const { authRoutes } = require('@routes');
+const errorHandler = require('@utils/errorHandler');
 
 app.use(cors());
 app.use(express.json());
@@ -20,6 +22,12 @@ app.use(generatedRequestId);
 app.use(passport.initialize());
 // Import and use the attachUserId middleware
 app.use(attachUserId);
+
+// Routes
+app.use('/api/v1/auth', authRoutes);
+
+// Error handling middleware (must be last)
+app.use(errorHandler);
 
 (async () => {
   try {
