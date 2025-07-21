@@ -11,20 +11,39 @@ const isProd = environment === 'production';
 
 // Get environment-specific JWT secret
 const getJwtSecret = () => {
+    const environment = process.env.NODE_ENV || 'development';
+    let secret;
+    
     switch(environment) {
         case 'production':
-            return process.env.JWT_SECRET_PRODUCTION;
+            secret = process.env.JWT_SECRET_PRODUCTION;
+            break;
         case 'testing':
-            return process.env.JWT_SECRET_TESTING;
+            secret = process.env.JWT_SECRET_TESTING;
+            break;
         case 'development':
         default:
-            return process.env.JWT_SECRET_DEVELOPMENT;
+            secret = process.env.JWT_SECRET_DEVELOPMENT;
+            break;
     }
+    
+    // Fallback to generic JWT_SECRET if environment-specific one is not found
+    if (!secret) {
+        secret = process.env.JWT_SECRET;
+    }
+    
+    if (!secret) {
+        throw new Error(`JWT secret not found for environment: ${environment}. Please check your environment variables.`);
+    }
+    
+    return secret;
 };
+
+const jwtSecret = getJwtSecret();
 
 const jwtOptions={
   jwtFromRequest,
-  secretOrKey: getJwtSecret(),
+  secretOrKey: jwtSecret,
   algorithms: ['HS256'],
 }
 
