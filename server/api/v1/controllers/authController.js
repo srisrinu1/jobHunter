@@ -1,4 +1,4 @@
-const {authService}=require('@services');
+const {authService, mailerSendService}=require('@services');
 const {formatUserResponse}=require('@utils/responseHelper');
 const STATUS = require('@utils/statusCodes');
 const logger = require('@utils/logger');
@@ -138,21 +138,24 @@ const logOut=async (req, res,next) => {
 const requestPasswordReset = async (req, res,next) => {
     try{
         const token = await authService.requestPasswordReset(req.body.email);
-        // For manual testing, include the token in the response
-        if (isDevelopment) {
-            response={
-                success: true,
-                message: 'If that email is in our system, you will receive a password reset link shortly',
-                resetToken: token
-            };
+        
+        // Send email for testing - temporarily enabled for development
+        try {
+            await mailerSendService.sendResetPasswordEmail(req.body.email, token);
+            logger.info(`Password reset email sent to: ${req.body.email}`);
+        } catch (emailError) {
+            logger.error(`Failed to send reset email to ${req.body.email}:`, emailError);
+            // Continue with response even if email fails (graceful degradation)
         }
-        else{
-            response={
-                success: true,
-                message: 'If that email is in our system, you will receive a password reset link shortly'
-            };
+        
+        if (isDevelopment && !isProduction) {
+            // Only log the reset token in development, never in production
+            logger.debug(`Password reset token for ${req.body.email}: ${token}`);
         }
-        res.status(STATUS.OK).json(response);
+        res.status(STATUS.OK).json({
+            success: true,
+            message: 'If that email is in our system, you will receive a password reset link shortly'
+        });
     }catch(error){
         res.status(STATUS.INTERNAL_SERVER_ERROR).json({
             success: false,
