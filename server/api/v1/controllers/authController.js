@@ -139,12 +139,12 @@ const requestPasswordReset = async (req, res,next) => {
     try{
         const token = await authService.requestPasswordReset(req.body.email);
         // For manual testing, include the token in the response
-        const response = {
-          success: true,
-         message: 'If that email is in our system, you will receive a password reset link shortly'
-   };
-       if (isDevelopment) {
-        response.resetToken = token;
+        if (isDevelopment) {
+            response={
+                success: true,
+                message: 'If that email is in our system, you will receive a password reset link shortly',
+                resetToken: token
+            };
         }
         res.status(STATUS.OK).json(response);
     }catch(error){
