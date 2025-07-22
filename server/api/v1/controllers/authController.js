@@ -5,6 +5,7 @@ const logger = require('@utils/logger');
 const { getRequestId } = require('@utils/requestContext');
 
 const isProduction = process.env.NODE_ENV === 'production';
+const isDevelopment = process.env.NODE_ENV === 'development';
 const cookieOptions_accessToken = {
     httpOnly: true,
     secure: isProduction,
@@ -137,12 +138,21 @@ const logOut=async (req, res,next) => {
 const requestPasswordReset = async (req, res,next) => {
     try{
         const token = await authService.requestPasswordReset(req.body.email);
-        // Send the reset token via email
-        logger.info(`Password reset token sent to email: ${req.body.email}`);
-        res.status(STATUS.OK).json({
-            success: true,
-            message: 'If that email is in our system, you will receive a password reset link shortly'
-        });
+        // For manual testing, include the token in the response
+        if (isDevelopment) {
+            response={
+                success: true,
+                message: 'If that email is in our system, you will receive a password reset link shortly',
+                resetToken: token
+            };
+        }
+        else{
+            response={
+                success: true,
+                message: 'If that email is in our system, you will receive a password reset link shortly'
+            };
+        }
+        res.status(STATUS.OK).json(response);
     }catch(error){
         res.status(STATUS.INTERNAL_SERVER_ERROR).json({
             success: false,
