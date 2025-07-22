@@ -1,6 +1,6 @@
 const CustomError=require('./CustomError');
 const logger = require('./logger');
-const STATUS = require('@config/statusCodes');
+const STATUS = require('./statusCodes');
 const {getRequestId}=require('./requestContext');
 
 

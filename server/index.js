@@ -1,8 +1,13 @@
 require('module-alias/register');
 const express = require('express');
 const app=express();
+app.set('trust proxy', true);
 const cors = require('cors');
-require('dotenv').config();
+const cookieParser = require('cookie-parser');
+
+// Load environment-specific .env file
+const environment = process.env.NODE_ENV || 'development';
+require('dotenv').config({ path: `.env.${environment}` });
 const {connectDB} = require('./db');
 const generatedRequestId=require('@middleware/requestId');
 const passport = require('passport');
@@ -11,9 +16,9 @@ const { authRoutes } = require('@routes');
 const errorHandler = require('@utils/errorHandler');
 
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const environment = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 5000;
 
 

@@ -1,6 +1,8 @@
 const {authService}=require('@services');
 const {formatUserResponse}=require('@utils/responseHelper');
 const STATUS = require('@utils/statusCodes');
+const logger = require('@utils/logger');
+const { getRequestId } = require('@utils/requestContext');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const cookieOptions_accessToken = {
@@ -40,7 +42,8 @@ const register = async (req, res,next) => {
 
 const login = async (req, res,next) => {
     try{
-        const reqMeta= {userAgent: req.get('User-Agent'), ip: req.ip };
+        const reqMeta = { userAgent: req.get('User-Agent'), ip: req.ip };
+        logger.info(`Login attempt from IP: ${reqMeta.ip}, email: ${req.body.email}`);
         const { user, accessToken, refreshToken } = await authService.loginUser(req.body.email, req.body.password,reqMeta);
         res.cookie('accessToken', accessToken, cookieOptions_accessToken)
         .cookie('refreshToken', refreshToken, cookieOptions_refreshToken)
@@ -59,11 +62,38 @@ const login = async (req, res,next) => {
 
 const refresh = async (req, res,next) => {
     try{
-        const refreshToken=req.cookies.refreshToken;
+        // Debug logging
+        logger.info(`Request method: ${req.method}`);
+        logger.info(`Request headers: ${JSON.stringify(req.headers)}`);
+        logger.info(`Request body type: ${typeof req.body}`);
+        logger.info(`Request body: ${JSON.stringify(req.body)}`);
+        logger.info(`Request cookies type: ${typeof req.cookies}`);
+        logger.info(`Request cookies: ${JSON.stringify(req.cookies)}`);
+        
+        // Check if req.body exists
+        if (!req.body) {
+            logger.error('req.body is undefined - express.json() middleware not working');
+            return res.status(STATUS.BAD_REQUEST).json({
+                success: false,
+                status: 'Request body is missing',
+                requestId: getRequestId()
+            });
+        }
+        
+        // Check if req.cookies exists
+        if (!req.cookies) {
+            logger.error('req.cookies is undefined - cookie-parser middleware not working');
+        }
+        
+        const refreshToken = (req.cookies && req.cookies.refreshToken) || 
+                           (req.body && req.body.refreshToken);
+        logger.info(`Refresh token: ${refreshToken}`);
+        
         if(!refreshToken){
             return res.status(STATUS.UNAUTHORIZED).json({
                 success: false,
-                status: 'Refresh token is required'
+                status: 'Refresh token is required',
+                requestId: getRequestId()
             });
         }
         const reqMeta= {userAgent: req.get('User-Agent'), ip: req.ip };
@@ -106,14 +136,13 @@ const logOut=async (req, res,next) => {
 
 const requestPasswordReset = async (req, res,next) => {
     try{
-        const token= await authService.requestPasswordReset(req.body.email);
-        //Send the token via mail 
-        //For now,we will keep it idle.We will implement the email service later
+        const token = await authService.requestPasswordReset(req.body.email);
+        // Send the reset token via email
+        logger.info(`Password reset token sent to email: ${req.body.email}`);
         res.status(STATUS.OK).json({
             success: true,
-            message: 'If that email is in our system, you will receive a password reset link shortly',
+            message: 'If that email is in our system, you will receive a password reset link shortly'
         });
-
     }catch(error){
         res.status(STATUS.INTERNAL_SERVER_ERROR).json({
             success: false,

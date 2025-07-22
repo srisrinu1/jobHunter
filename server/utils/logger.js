@@ -14,7 +14,7 @@ if(isProduction){
     logLevel="info";
 }
 else if(isDevelopment){
-    logLevel="warn";
+    logLevel="info";
 }
 else if(isTesting){
     logLevel="debug";
@@ -27,7 +27,7 @@ const injectAlsContext=format((info)=>{
     const userId = getUserId();
     if (userId) info.userId = userId;
     return info;
-});
+})();
 
 const devFormat=format.combine(
     format.colorize(),  
