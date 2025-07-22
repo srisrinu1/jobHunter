@@ -14,7 +14,7 @@ if(isProduction){
     logLevel="info";
 }
 else if(isDevelopment){
-    logLevel="warn";
+    logLevel="info";
 }
 else if(isTesting){
     logLevel="debug";
