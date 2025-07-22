@@ -146,6 +146,12 @@ const requestPasswordReset = async (req, res,next) => {
                 resetToken: token
             };
         }
+        else{
+            response={
+                success: true,
+                message: 'If that email is in our system, you will receive a password reset link shortly'
+            };
+        }
         res.status(STATUS.OK).json(response);
     }catch(error){
         res.status(STATUS.INTERNAL_SERVER_ERROR).json({
