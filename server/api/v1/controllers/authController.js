@@ -42,7 +42,8 @@ const register = async (req, res,next) => {
 
 const login = async (req, res,next) => {
     try{
-        const reqMeta= {userAgent: req.get('User-Agent'), ip: req.ip };
+        const reqMeta = { userAgent: req.get('User-Agent'), ip: req.ip };
+        logger.info(`Login attempt from IP: ${reqMeta.ip}, email: ${req.body.email}`);
         const { user, accessToken, refreshToken } = await authService.loginUser(req.body.email, req.body.password,reqMeta);
         res.cookie('accessToken', accessToken, cookieOptions_accessToken)
         .cookie('refreshToken', refreshToken, cookieOptions_refreshToken)
