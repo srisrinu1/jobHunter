@@ -1,6 +1,6 @@
 const axios=require('axios');
 
-const sendResetPasswordEmail=(email,resetPasswordToken)=>{
+const sendResetPasswordEmail= async(email,resetPasswordToken)=>{
     let resetPasswordUrl;
     if (process.env.NODE_ENV === 'production') {
         resetPasswordUrl = `${process.env.RESET_PASSWORD_URL_PRODUCTION}?token=${resetPasswordToken}&email=${encodeURIComponent(email)}`;
@@ -25,7 +25,7 @@ const sendResetPasswordEmail=(email,resetPasswordToken)=>{
             </div>
         `
     };
-    return axios.post('https://api.mailersend.com/v1/email', mailData, {
+    await axios.post('https://api.mailersend.com/v1/email', mailData, {
         headers: {
             Authorization: `Bearer ${process.env.MAILERSEND_API_KEY}`
         }
