@@ -1,6 +1,7 @@
 const { User, RefreshToken } = require('@models');
 const jwtUtil= require('@utils/jwt');
 const crypto= require('crypto');
+const logger = require('@utils/logger');
 
 
 const getRefreshTokenExpiry=()=>{
@@ -34,10 +35,15 @@ const registerUser=async(userData, reqMeta={})=>{
 }
 
 const loginUser=async(email, password,reqMeta={})=>{
+  logger.debug(`Login attempt for email: ${email?.replace(/(.{2}).*@/, '$1***@')}`);
   const user=await User.findOne({ email }).select('+password');
+  
   if(!user || !(await user.verifyPassword(password))) {
+    logger.warn(`Login failed for email: ${email?.replace(/(.{2}).*@/, '$1***@')}`);
     throw new Error('Invalid email or password');
   }
+  
+  logger.info(`Login successful for email: ${email?.replace(/(.{2}).*@/, '$1***@')}`);
   return {user,
     ...(await issueTokens(user, reqMeta))
 };
@@ -121,7 +127,6 @@ module.exports = {
   resetPassword,
   getUserProfile
 };
-
 
 
 
