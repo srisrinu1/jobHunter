@@ -20,7 +20,7 @@ const logLevels={
 
 let  logLevel="info";
 if(isDevelopment || isTesting){
-    logLevel="debug";;
+    logLevel="debug";
 }
 
 
