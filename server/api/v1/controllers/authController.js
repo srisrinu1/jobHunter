@@ -44,8 +44,10 @@ const register = async (req, res,next) => {
 const login = async (req, res,next) => {
     try{
         const reqMeta = { userAgent: req.get('User-Agent'), ip: req.ip };
-        logger.info(`Login attempt from IP: ${reqMeta.ip}, email: ${req.body.email}`);
+        logger.info(`Login attempt from IP: ${reqMeta.ip}, email: ${req.body.email?.replace(/(.{2}).*@/, '$1***@')}`);
         const { user, accessToken, refreshToken } = await authService.loginUser(req.body.email, req.body.password,reqMeta);
+        
+        logger.info(`Login successful for user: ${user.email?.replace(/(.{2}).*@/, '$1***@')}`);
         res.cookie('accessToken', accessToken, cookieOptions_accessToken)
         .cookie('refreshToken', refreshToken, cookieOptions_refreshToken)
         .status(STATUS.OK)
@@ -57,19 +59,14 @@ const login = async (req, res,next) => {
             }
         });
     }catch(error) {
+        logger.warn(`Login failed from IP: ${req.ip}, email: ${req.body.email?.replace(/(.{2}).*@/, '$1***@')} - ${error.message}`);
         next(error);
     }
 }
 
 const refresh = async (req, res,next) => {
     try{
-        // Debug logging
-        logger.info(`Request method: ${req.method}`);
-        logger.info(`Request headers: ${JSON.stringify(req.headers)}`);
-        logger.info(`Request body type: ${typeof req.body}`);
-        logger.info(`Request body: ${JSON.stringify(req.body)}`);
-        logger.info(`Request cookies type: ${typeof req.cookies}`);
-        logger.info(`Request cookies: ${JSON.stringify(req.cookies)}`);
+        
         
         // Check if req.body exists
         if (!req.body) {
