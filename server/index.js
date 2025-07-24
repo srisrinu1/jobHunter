@@ -14,6 +14,7 @@ const passport = require('passport');
 const attachUserId = require('@middleware/attachUserId');
 const { authRoutes } = require('@routes');
 const errorHandler = require('@utils/errorHandler');
+const morganMiddleware = require('@middleware/morganMiddleware');
 
 app.use(cors());
 app.use(cookieParser());
@@ -24,6 +25,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware to generate and set request ID
 app.use(generatedRequestId);
+app.use(morganMiddleware);
 app.use(passport.initialize());
 // Import and use the attachUserId middleware
 app.use(attachUserId);

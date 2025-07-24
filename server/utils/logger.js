@@ -9,16 +9,20 @@ const isProduction = env === 'production';
 const isDevelopment = env === 'development';
 const isTesting = env === 'testing';
 
-let  logLevel="error";
-if(isProduction){
-    logLevel="info";
+const logLevels={
+    error: 0,
+    warn: 1,
+    info: 2,
+    http: 3,
+    debug: 4,
+    silly: 5
 }
-else if(isDevelopment){
-    logLevel="info";
-}
-else if(isTesting){
+
+let  logLevel="info";
+if(isDevelopment || isTesting){
     logLevel="debug";
 }
+
 
 // const logToFile = isProduction ? true : false;
 
@@ -32,8 +36,15 @@ const injectAlsContext=format((info)=>{
 const devFormat=format.combine(
     format.colorize(),  
     format.timestamp(),
-    format.printf(({timestamp,level,message})=>{
-        return `${timestamp} ${level}: ${message}`;
+    format.printf(({timestamp, level, message, requestId, userId}) => {
+        let logMessage = `${timestamp} ${level}: ${message}`;
+        if (requestId && requestId !== 'unknown') {
+            logMessage += ` [requestId: ${requestId}]`;
+        }
+        if (userId) {
+            logMessage += ` [userId: ${userId}]`;
+        }
+        return logMessage;
     })
 );
 
@@ -86,16 +97,15 @@ else{
     );
 }
 
-const logger=createLogger({
-    level:logLevel,
-    format: format.combine(
+const logger = createLogger({
+    level: logLevel,
+    levels: logLevels,
+     format: format.combine(
         injectAlsContext,
         isDevelopment? devFormat : isProduction ? prodFormat : testFormat
     ),
-    transports:loggerTransports,
-    defaultMeta:{service:'jobHunter-backend'},
-
+    transports: loggerTransports,
+    defaultMeta: { service: 'jobHunter-backend' },
 });
 
-module.exports=logger;
-
+module.exports = logger;
