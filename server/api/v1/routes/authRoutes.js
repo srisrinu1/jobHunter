@@ -3,6 +3,7 @@ const router = express.Router();
 const { authController } = require('@controllers');
 const { userValidation } = require('@validations');
 const { authenticateJWT } = require('@middleware/authMiddleware');
+const { attachUserId } = require('@middleware/attachUserId');
 
 // Public routes
 router.post('/register', userValidation.validateSignup, authController.register);
@@ -13,6 +14,6 @@ router.post('/request-password-reset', authController.requestPasswordReset);
 router.post('/reset-password', authController.resetPassword);
 
 // Protected routes
-router.get('/profile', authenticateJWT, authController.getUserProfile);
+router.get('/profile', authenticateJWT, attachUserId, authController.getUserProfile);
 
 module.exports = router;
