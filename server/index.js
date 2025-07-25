@@ -15,8 +15,33 @@ const attachUserId = require('@middleware/attachUserId');
 const { authRoutes } = require('@routes');
 const errorHandler = require('@utils/errorHandler');
 const morganMiddleware = require('@middleware/morganMiddleware');
+const logger = require('./utils/logger');
 
-app.use(cors());
+if(environment==='production'){
+   const allowedOrigins = process.env.ALLOWED_ORIGINS_PRODUCTION
+     ? process.env.ALLOWED_ORIGINS_PRODUCTION.split(',')
+     : [];
+   const corsOptions = {
+     origin: (origin, callback) => {
+       try {
+         if (!origin || allowedOrigins.includes(origin)) {
+           return callback(null, true);
+         } else {
+           logger.warn(`Blocked CORS request from origin: ${origin}`);
+           return callback(new Error('CORS policy violation: Origin not allowed'), false);
+         }
+       } catch (err) {
+         logger.error(`CORS origin check failed: ${err.message}`);
+         return callback(new Error('CORS internal error'), false);
+       }
+     }
+   };
+   app.use(cors(corsOptions));
+}
+else{
+  app.use(cors());
+}
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
