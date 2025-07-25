@@ -34,7 +34,8 @@ if(environment==='production'){
          logger.error(`CORS origin check failed: ${err.message}`);
          return callback(new Error('CORS internal error'), false);
        }
-     }
+     },
+     credentials: true
    };
    app.use(cors(corsOptions));
 }
