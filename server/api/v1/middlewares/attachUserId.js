@@ -6,4 +6,5 @@ const attachUserId = (req, res, next) => {
     next();
 };
 
-module.exports = attachUserId;
+module.exports = 
+{attachUserId};
