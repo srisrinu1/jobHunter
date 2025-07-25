@@ -27,8 +27,7 @@ const PORT = process.env.PORT || 5000;
 app.use(generatedRequestId);
 app.use(morganMiddleware);
 app.use(passport.initialize());
-// Import and use the attachUserId middleware
-app.use(attachUserId);
+
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
