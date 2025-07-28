@@ -11,6 +11,7 @@ require('dotenv').config({ path: `.env.${environment}` });
 const {connectDB} = require('./db');
 const generatedRequestId=require('@middleware/requestId');
 const passport = require('passport');
+const helmet = require('helmet');
 const attachUserId = require('@middleware/attachUserId');
 const { authRoutes } = require('@routes');
 const errorHandler = require('@utils/errorHandler');
@@ -41,6 +42,84 @@ if(environment==='production'){
 }
 else{
   app.use(cors());
+}
+
+// Environment-specific Helmet security headers
+if (environment === 'production') {
+  // Production: Strict security headers
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
+    },
+    crossOriginEmbedderPolicy: { policy: "require-corp" },
+    crossOriginOpenerPolicy: { policy: "same-origin" },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    dnsPrefetchControl: { allow: false },
+    frameguard: { action: 'deny' },
+    hidePoweredBy: true,
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true
+    },
+    ieNoOpen: true,
+    noSniff: true,
+    originAgentCluster: true,
+    permittedCrossDomainPolicies: false,
+    referrerPolicy: { policy: "no-referrer" },
+    xssFilter: true,
+  }));
+} else if (environment === 'development') {
+  // Development: Relaxed CSP for hot reloading and dev tools
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // Allow eval for dev tools
+        imgSrc: ["'self'", "data:", "https:", "http:"],
+        connectSrc: ["'self'", "ws:", "wss:"], // Allow websockets for hot reload
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'self'"],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Disable for dev flexibility
+    crossOriginOpenerPolicy: false,
+    dnsPrefetchControl: { allow: true },
+    frameguard: { action: 'sameorigin' },
+    hidePoweredBy: true,
+    hsts: false, // No HTTPS enforcement in dev
+    ieNoOpen: true,
+    noSniff: true,
+    referrerPolicy: { policy: "no-referrer-when-downgrade" },
+    xssFilter: true,
+  }));
+} else {
+  // Testing: Minimal security headers to avoid interference with tests
+  app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for tests
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    dnsPrefetchControl: false,
+    frameguard: false,
+    hsts: false,
+    referrerPolicy: false,
+    hidePoweredBy: true, // Always hide Express signature
+    noSniff: true,
+    xssFilter: true,
+  }));
 }
 
 app.use(cookieParser());
